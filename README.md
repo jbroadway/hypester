@@ -2,7 +2,8 @@
 
 **Status: Alpha**
 
-A JavaScript library to help with common forms of interactivity in the Tumult Hype HTML5 editor.
+A JavaScript library to help with common forms of interactivity in the
+[Tumult Hype](http://tumult.com/hype/) HTML5 editor.
 
 Note: Requires [jQuery 1.8+](http://jquery.com)
 
