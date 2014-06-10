@@ -173,11 +173,17 @@ initial location in the scene.
 #### Step 3. Check if the activity has been completed
 
 In the last frame of your `correct_timeline` timeline(s), add a Timeline Action that
-runs a new JavaScript function that contains the following:
+runs a new JavaScript function like this:
+
+![Timeline Action](https://raw.githubusercontent.com/jbroadway/hypester/master/docs/pix/drag_completed_action.png)
+
+The function should contains the following code:
 
 ```javascript
 hypester.drag_completed (hypeDocument);
 ```
+
+
 
 This will trigger the `completed_timeline` from `hypester.init()` only when all of
 the draggable elements have been dropped on the correct dropzones.
