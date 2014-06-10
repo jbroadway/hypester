@@ -91,6 +91,97 @@ callback action to your "Previous" button that calls this function:
 hypester.previous (hypeDocument);
 ```
 
+### Creating drag and drop activities
+
+Use the `hypester.drag_handler()` and `hypester.drag_completed()` functions to
+create drag and drop activities with multiple dropzones per draggable element,
+one or more of which are the correct choice.
+
+#### Step 1. Initialize the scene
+
+Initialize the scene on the first keyframe of the `Main Timeline` like this:
+
+```javascript
+hypester.init ({
+	hype: hypeDocument,
+	element: element,
+	event: event,
+	draggable: {
+		elements: 4,
+		completed_timeline: 'complete',
+		dropzones: [
+			{ id: 'drop1' },
+			{ id: 'drop2' },
+			{ id: 'drop3' },
+			{ id: 'drop4' }
+		]
+	}
+});
+```
+
+Specify the number of draggable elements in the `elements` setting, and a timeline
+that should be run when all of the elements have been dropped into the correct dropzone.
+This timeline will be triggered by `hypester.drag_completed()` only when all of the
+elements have been dropped correctly.
+
+Each dropzone has an `id` setting that should match an element's `Unique Element ID`
+field in the Hype Inspector, which you will need to set manually. A dropzone may also
+have `bg_off` and `bg_on` settings which are used to toggle the background image of
+the element when a draggable element hovers over it. The images should be loaded into
+your Hype Resources. For example:
+
+```javascript
+{ id: 'drop1', bg_off: 'drop1_off.png', bg_on: 'drop1_on.png' }
+```
+
+#### Step 2. Make your elements draggable
+
+On each draggable element, open the Hype Inspector and add two `On Drag` actions:
+
+1. `Control Element Position` to enable drag and drop
+2. `Run Javascript` and create a new function
+
+Call the following in your newly created function:
+
+```javascript
+hypester.drag_handler ({
+	hype: hypeDocument,
+	element: element,
+	event: event,
+	correct_answer: 'drop2',
+	correct_timeline: 'correct',
+	incorrect_timeline: 'incorrect',
+	reset_timeline: 'reset_drag1'
+});
+```
+
+The `correct_answer` is the ID of the dropzone or list of IDs of the dropzones
+that are considered correct choices. To specify a list, set it to an array, e.g.,
+`['drop2', 'drop3']`.
+
+The `correct_timeline` is a timeline that is played when the user drops an element
+onto one of the correct dropzones.
+
+The `incorrect_timeline` is a timeline that is played when the user drops an
+element onto one of the other dropzones.
+
+The `reset_timeline` is a timeline that is played when the user drops an element onto
+anywhere except one of the correct dropzones to reset its position. At keyframe 0,
+this timeline should pin the `Origin (Left)` and `Origin (Top)` properties to its
+initial location in the scene.
+
+#### Step 3. Check if the activity has been completed
+
+In the last frame of your `correct_timeline` timeline(s), add a Timeline Action that
+runs a new JavaScript function that contains the following:
+
+```javascript
+hypester.drag_completed (hypeDocument);
+```
+
+This will trigger the `completed_timeline` from `hypester.init()` only when all of
+the draggable elements have been dropped on the correct dropzones.
+
 -----
 
 Brought to you by [The Campfire Union](https://www.campfireunion.com)
