@@ -404,7 +404,12 @@ var hypester = (function ($) {
 					var text = $this.attr ('src');
 					break;
 				default:
-					var text = $this.text ();
+					var text = $this // trick to get text without text of children
+						.clone ()
+						.children ()
+						.remove ()
+						.end ()
+						.text ();
 					break;
 			}
 			
