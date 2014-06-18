@@ -31,10 +31,13 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <p><strong>Status: Alpha</strong></p>
 
 <p>A JavaScript library to help with common forms of interactivity in the
 <a href="http://tumult.com/hype/">Tumult Hype</a> HTML5 editor.</p>
+        <p>
+        	<strong>Status: Early Beta</strong><br />
+        	<strong>License: <a href="https://github.com/jbroadway/hypester/blob/master/LICENSE">Open Source (MIT)</a></strong>
+        </p>
 
 <p>Note: Requires <a href="http://jquery.com">jQuery 1.8+</a></p>
 
@@ -220,15 +223,104 @@ runs a new JavaScript function like this:</p>
 <p>This will trigger the <code>completed_timeline</code> from <code>hypester.init()</code> only when all of
 the draggable elements have been dropped on the correct dropzones.</p>
 
-<hr><p>Brought to you by <a href="https://www.campfireunion.com">The Campfire Union</a></p>
+<h3>
+<a name="user-content-injecting-dynamic-text-into-hype-activities" class="anchor" href="#injecting-dynamic-text-into-hype-activities" aria-hidden="true"><span class="octicon octicon-link"></span></a>Injecting dynamic text into Hype activities</h3>
+
+<p>Turn your Hype document into a template with dynamic text, image sources, and even
+form fields.</p>
+
+<h4>
+<a name="user-content-step-1-add-your-template-tags" class="anchor" href="#step-1-add-your-template-tags" aria-hidden="true"><span class="octicon octicon-link"></span></a>Step 1. Add your template tags</h4>
+
+<p>The text for a given element should contain a tag name of your choice in the form:</p>
+
+<pre><code>{tag_name}
+</code></pre>
+
+<p>This can also be included in image source fields:</p>
+
+<pre><code>&lt;img src="{photo}" /&gt;
+</code></pre>
+
+<p>And in form input values:</p>
+
+<pre><code>&lt;input type="text" name="input" value="{input}" /&gt;
+</code></pre>
+
+<h4>
+<a name="user-content-step-2-create-the-hypester_labels-object" class="anchor" href="#step-2-create-the-hypester_labels-object" aria-hidden="true"><span class="octicon octicon-link"></span></a>Step 2. Create the <code>hypester_labels</code> object</h4>
+
+<p>Create a JavaScript file named <code>hypester_labels.js</code> that contains the following:</p>
+
+<pre><code>var hypester_labels = {
+    tag_name: 'Hell World',
+    photo: '/files/photo1.png',
+    input: 'Placeholder text...'
+};
+</code></pre>
+
+<p>Load this file into your Hype resource library.</p>
+
+<h4>
+<a name="user-content-step-3-call-hypesterinit" class="anchor" href="#step-3-call-hypesterinit" aria-hidden="true"><span class="octicon octicon-link"></span></a>Step 3. Call <code>hypester.init()</code>
+</h4>
+
+<p>In the first keyframe of the main timeline of your first scene, add a Timeline Action
+that calls this:</p>
+
+<pre><code>hypester.init({hype: hypeDocument});
+</code></pre>
+
+<p>If your <code>hypester_labels.js</code> file has been included, previewing in the browser should
+replace the tags for you automatically.</p>
+
+<h4>
+<a name="user-content-step-4-interacting-with-the-hype-document" class="anchor" href="#step-4-interacting-with-the-hype-document" aria-hidden="true"><span class="octicon octicon-link"></span></a>Step 4. Interacting with the Hype document</h4>
+
+<p>If you want to update a value in <code>hypester_labels</code>, use the following:</p>
+
+<pre><code>hypester.update_element ('tag_name', 'New value');
+</code></pre>
+
+<p>This will update the value and propagate the change throughout your Hype document.
+If you do update the <code>hypester_labels</code> properties directly through some other means,
+you can propagate the changes across the whole file via:</p>
+
+<pre><code>hypester.update_elements ();
+</code></pre>
+
+<p>You can also create instances of the <code>HypesterElement</code> class that represent elements
+that should always print the latest value of <code>hypester_labels.some_property</code> via:</p>
+
+<pre><code>var alert_msg = new HypesterElement ('alert_msg');
+</code></pre>
+
+<p>For example:</p>
+
+<pre><code>var hypester_labels = {
+    alert_msg: 'The sky is falling'
+};
+
+var alert_msg = new HypesterElement ('alert_msg');
+alert (alert_msg); // The sky is falling
+
+hypester.update_element ('alert_msg', 'Everything will be okay';
+alert (alert_msg); // Everything will be okay
+
+hypester_labels.alert_msg = 'The sky is falling again';
+alert (alert_msg); // The sky is falling again
+</code></pre>
+
+<p>A HypesterElement object can be used in place of any JavaScript string to keep its
+value updated with the latest <code>hypester_labels</code> value every time it's referenced.</p>
+
       </section>
     </div>
 
     <!-- FOOTER  -->
     <div id="footer_wrap" class="outer">
       <footer class="inner">
-        <p class="copyright">Hypester maintained by <a href="https://github.com/jbroadway">jbroadway</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+        <p class="copyright">Hypester is brought to you by <a href="https://www.campfireunion.com">The Campfire Union</a></p>
       </footer>
     </div>
 
