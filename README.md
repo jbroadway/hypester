@@ -261,6 +261,9 @@ For example:
 	hypester_labels.alert_msg = 'The sky is falling again';
 	alert (alert_msg); // The sky is falling again
 
+A HypesterElement object can be used in place of any JavaScript string to keep its
+value updated with the latest `hypester_labels` value every time it's referenced.
+
 -----
 
 Brought to you by [The Campfire Union](https://www.campfireunion.com)
