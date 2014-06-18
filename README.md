@@ -188,6 +188,79 @@ hypester.drag_completed (hypeDocument);
 This will trigger the `completed_timeline` from `hypester.init()` only when all of
 the draggable elements have been dropped on the correct dropzones.
 
+### Injecting dynamic text into Hype activities
+
+Turn your Hype document into a template with dynamic text, image sources, and even
+form fields.
+
+#### Step 1. Add your template tags
+
+The text for a given element should contain a tag name of your choice in the form:
+
+	{tag_name}
+
+This can also be included in image source fields:
+
+	<img src="{photo}" />
+
+And in form input values:
+
+	<input type="text" name="input" value="{input}" />
+
+#### Step 2. Create the `hypester_labels` object
+
+Create a JavaScript file named `hypester_labels.js` that contains the following:
+
+	var hypester_labels = {
+		tag_name: 'Hell World',
+		photo: '/files/photo1.png',
+		input: 'Placeholder text...'
+	};
+
+Load this file into your Hype resource library.
+
+#### Step 3. Call `hypester.init()`
+
+In the first keyframe of the main timeline of your first scene, add a Timeline Action
+that calls this:
+
+	hypester.init({hype: hypeDocument});
+
+If your `hypester_labels.js` file has been included, previewing in the browser should
+replace the tags for you automatically.
+
+#### Step 4. Interacting with the Hype document
+
+If you want to update a value in `hypester_labels`, use the following:
+
+	hypester.update_element ('tag_name', 'New value');
+
+This will update the value and propagate the change throughout your Hype document.
+If you do update the `hypester_labels` properties directly through some other means,
+you can propagate the changes across the whole file via:
+
+	hypester.update_elements ();
+
+You can also create instances of the `HypesterElement` class that represent elements
+that should always print the latest value of `hypester_labels.some_property` via:
+
+	var alert_msg = new HypesterElement ('alert_msg');
+
+For example:
+
+	var hypester_labels = {
+		alert_msg: 'The sky is falling'
+	};
+	
+	var alert_msg = new HypesterElement ('alert_msg');
+	alert (alert_msg); // The sky is falling
+	
+	hypester.update_element ('alert_msg', 'Everything will be okay';
+	alert (alert_msg); // Everything will be okay
+	
+	hypester_labels.alert_msg = 'The sky is falling again';
+	alert (alert_msg); // The sky is falling again
+
 -----
 
 Brought to you by [The Campfire Union](https://www.campfireunion.com)

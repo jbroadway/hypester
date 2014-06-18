@@ -10,6 +10,28 @@
  *
  * Brought to you by The Campfire Union (https://www.campfireunion.com)
  */
+
+/**
+ * This class simply overrides its toString() method to
+ * return the value from the hypester_labels for its
+ * label property (set via the constructor), so that
+ * outputting an instance of it as a string will return
+ * the desired string instead of `[object Object]`.
+ */
+function HypesterElement (label) {
+	this.label = label;
+}
+
+/**
+ * Overrides toString() for HypesterElement.
+ */
+HypesterElement.prototype.toString = function () {
+	return hypester_labels[this.label];
+};
+
+/**
+ * The hypester object.
+ */
 var hypester = (function ($) {
 	var self = {},
 		settings = {
@@ -108,7 +130,7 @@ var hypester = (function ($) {
 		settings = $.extend (defaults, options);
 		
 		// if a #scene-name is found, jump to that scene
-		if (! hype_loaded) {
+		/*if (! hype_loaded) {
 			var hash = window.location.hash.substring (1);
 			for (var i = 0; i < settings.hype.sceneNames ().length; i++) {
 				if (settings.hype.sceneNames ()[i] == hash) {
@@ -130,7 +152,10 @@ var hypester = (function ($) {
 		// initialize dropzone element nodes
 		for (var i = 0; i < settings.draggable.dropzones.length; i++) {
 			settings.draggable.dropzones[i].element = document.getElementById (settings.draggable.dropzones[i].id);
-		}
+		}*/
+		
+		// initialize any elements with template tags
+		self.init_elements ();
 	};
 	
 	/**
@@ -340,6 +365,121 @@ var hypester = (function ($) {
 			return true;
 		}
 		return false;
+	};
+
+	/**
+	 * Initializes template tags found in the text or value attribute of
+	 * any HTML elements on the page. Tags take the form `{tag_name}`,
+	 * for example:
+	 *
+	 *     <span>{span_text}</span>
+	 *     <input type="text" value="{input_value}" />
+	 *
+	 * `hypester.init()` will call this so that subsequent calls to
+	 * `hypester_update_elements()` or `hypester.update_element(tag, new_value)`
+	 * will result in updates across all DOM nodes that should be refreshed.
+	 */	
+	self.init_elements = function () {
+		var elements = document.getElementsByTagName ('*');
+		for (var i = 0; i < elements.length; i++) {
+			var $this = $(elements[i]),
+				tagName = $this.prop ('tagName').toLowerCase ();
+			
+			switch (tagName) {
+				case 'html':
+				case 'head':
+				case 'title':
+				case 'meta':
+				case 'style':
+				case 'script':
+				case 'link':
+				case 'body':
+					continue;
+				case 'input':
+				case 'textarea':
+				case 'select':
+					var text = $this.val ();
+					break;
+				case 'img':
+					var text = $this.attr ('src');
+					break;
+				default:
+					var text = $this.text ();
+					break;
+			}
+			
+			if (text.substr (0, 1) === '{' && text.substr (text.lastIndexOf ('}')) === '}') {
+				var tag = text.substr (1, text.length - 2);
+				elements[i].setAttribute ('data-hypester-label', tag);
+			
+				switch (tagName) {
+					case 'input':
+					case 'textarea':
+					case 'select':
+						$this.val (hypester_labels[tag]);
+						break;
+					case 'img':
+						$this.attr ('src', hypester_labels[tag]);
+					default:
+						$this.text (hypester_labels[tag]);
+				}
+			}
+		}
+	};
+
+	/**
+	 * Update all tags across all HypesterElement objects, which will refresh
+	 * the value of each element with a template tag found in its inner text or
+	 * value attribute (depending on the tag type). Input, select and textarea are
+	 * the three that have their value attribute set. The rest replace their
+	 * inner text.
+	 */
+	self.update_elements = function () {
+		$('[data-hypester-label]').each (function () {
+			var $this = $(this),
+				tagName = $this.prop ('tagName').toLowerCase ();
+
+			switch (tagName) {
+				case 'input':
+				case 'textarea':
+				case 'select':
+					$this.val (hypester_labels[$this.data ('hypester-label')]);
+					break;
+				case 'img':
+					$this.attr ('src', hypester_labels[$this.data ('hypester-label')]);
+				default:
+					$this.text (hypester_labels[$this.data ('hypester-label')]);
+			}
+		});
+	};
+
+	/**
+	 * Update an individual tag across all HypesterElement objects, which will
+	 * update any elements with template tags found in their text or value
+	 * attribute (depending on the tag type). Input, select and textarea are
+	 * the three that have their value attribute set. The rest replace their
+	 * inner text.
+	 */
+	self.update_element = function (tag, new_value) {
+		hypester_labels[tag] = new_value;
+
+		$('[data-hypester-label="' + tag + '"]').each (function () {
+			var $this = $(this),
+				tagName = $this.prop ('tagName').toLowerCase ();
+		
+			switch (tagName) {
+				case 'input':
+				case 'textarea':
+				case 'select':
+					$this.val (new_value);
+					break;
+				case 'img':
+					$this.attr ('src', new_value);
+					break;
+				default:
+					$this.text (new_value);
+			}
+		});
 	};
 	
 	return self;
