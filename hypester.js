@@ -476,7 +476,9 @@ var hypester = (function ($) {
 				case 'input':
 				case 'textarea':
 				case 'select':
-					$this.val (new_value);
+					if (! $this.is (':focus')) {
+						$this.val (new_value);
+					}
 					break;
 				case 'img':
 					$this.attr ('src', new_value);
