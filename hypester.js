@@ -130,7 +130,7 @@ var hypester = (function ($) {
 		settings = $.extend (defaults, options);
 		
 		// if a #scene-name is found, jump to that scene
-		/*if (! hype_loaded) {
+		if (! hype_loaded) {
 			var hash = window.location.hash.substring (1);
 			for (var i = 0; i < settings.hype.sceneNames ().length; i++) {
 				if (settings.hype.sceneNames ()[i] == hash) {
@@ -152,7 +152,7 @@ var hypester = (function ($) {
 		// initialize dropzone element nodes
 		for (var i = 0; i < settings.draggable.dropzones.length; i++) {
 			settings.draggable.dropzones[i].element = document.getElementById (settings.draggable.dropzones[i].id);
-		}*/
+		}
 		
 		// initialize any elements with template tags
 		self.init_elements ();
