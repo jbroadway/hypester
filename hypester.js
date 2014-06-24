@@ -370,20 +370,26 @@ var hypester = (function ($) {
 	/**
 	 * Initializes template tags found in the text or value attribute of
 	 * any HTML elements on the page. Tags take the form `{tag_name}`,
+	 * or in the case of images, the id should take the form `photo:tag_name`,
 	 * for example:
 	 *
 	 *     <span>{span_text}</span>
 	 *     <input type="text" value="{input_value}" />
+	 *     <div id="photo:slideshow" style="background-image: url(photo1.jpg)" />
 	 *
 	 * `hypester.init()` will call this so that subsequent calls to
 	 * `hypester_update_elements()` or `hypester.update_element(tag, new_value)`
 	 * will result in updates across all DOM nodes that should be refreshed.
+	 *
+	 * Note that images don't show as `<img>` tags, but rather `<div>` tags with
+	 * a `background-image` style, which is how Hype implements image elements.
 	 */	
 	self.init_elements = function () {
 		var elements = document.getElementsByTagName ('*');
 		for (var i = 0; i < elements.length; i++) {
 			var $this = $(elements[i]),
-				tagName = $this.prop ('tagName').toLowerCase ();
+				tagName = $this.prop ('tagName').toLowerCase (),
+				id = $this.attr ('id');
 			
 			switch (tagName) {
 				case 'html':
@@ -399,9 +405,6 @@ var hypester = (function ($) {
 				case 'textarea':
 				case 'select':
 					var text = $this.val ();
-					break;
-				case 'img':
-					var text = $this.attr ('src');
 					break;
 				default:
 					var text = $this // trick to get text without text of children
@@ -421,12 +424,24 @@ var hypester = (function ($) {
 					case 'input':
 					case 'textarea':
 					case 'select':
+						elements[i].setAttribute ('data-hypester-type', 'form');
 						$this.val (hypester_labels[tag]);
 						break;
-					case 'img':
-						$this.attr ('src', hypester_labels[tag]);
 					default:
+						elements[i].setAttribute ('data-hypester-type', 'text');
 						$this.text (hypester_labels[tag]);
+				}
+
+			} else if (id && id.match (/^photo\:/)) {
+				var tag = $this.attr ('id').replace (/^photo\:/, '');
+				elements[i].setAttribute ('data-hypester-label', tag);
+				elements[i].setAttribute ('data-hypester-type', 'photo');
+
+				if (hypester_labels[tag] instanceof Array) {
+					$this.css ('background-image', 'url("' + settings.hype.resourcesFolderURL () + '/' + hypester_labels[tag][0] + '")');
+					elements[i].setAttribute ('data-hypester-photo', 0);
+				} else {
+					$this.css ('background-image', 'url("' + settings.hype.resourcesFolderURL () + '/' + hypester_labels[tag] + '")');
 				}
 			}
 		}
@@ -442,18 +457,22 @@ var hypester = (function ($) {
 	self.update_elements = function () {
 		$('[data-hypester-label]').each (function () {
 			var $this = $(this),
-				tagName = $this.prop ('tagName').toLowerCase ();
+				type = this.getAttribute ('data-hypester-type'),
+				label = this.getAttribute ('data-hypester-label');
 
-			switch (tagName) {
-				case 'input':
-				case 'textarea':
-				case 'select':
-					$this.val (hypester_labels[$this.data ('hypester-label')]);
+			switch (type) {
+				case 'form':
+					$this.val (hypester_labels[label]);
 					break;
-				case 'img':
-					$this.attr ('src', hypester_labels[$this.data ('hypester-label')]);
+				case 'photo':
+					if (hypester_labels[label] instanceof Array) {
+						var num = this.getAttribute ('data-hypester-photo');
+						$this.css ('background-image', 'url("' + settings.hype.resourcesFolderURL () + '/' + hypester_labels[label][num] + '")');
+					} else {
+						$this.css ('background-image', 'url("' + hypester_labels[label] + '")');
+					}
 				default:
-					$this.text (hypester_labels[$this.data ('hypester-label')]);
+					$this.text (hypester_labels[label]);
 			}
 		});
 	};
@@ -470,22 +489,55 @@ var hypester = (function ($) {
 
 		$('[data-hypester-label="' + tag + '"]').each (function () {
 			var $this = $(this),
-				tagName = $this.prop ('tagName').toLowerCase ();
+				type = this.getAttribute ('data-hypester-type');
 		
-			switch (tagName) {
-				case 'input':
-				case 'textarea':
-				case 'select':
+			switch (type) {
+				case 'form':
 					if (! $this.is (':focus')) {
 						$this.val (new_value);
 					}
 					break;
-				case 'img':
-					$this.attr ('src', new_value);
+				case 'photo':
+					$this.css ('background-image', 'url("' + settings.hype.resourcesFolderURL () + '/' + new_value + '")');
 					break;
 				default:
 					$this.text (new_value);
 			}
+		});
+	};
+	
+	/**
+	 * Rotate through a series of photos set in the `hypester_labels` list,
+	 * for example:
+	 *
+	 *     var hypester_labels = {
+	 *         "slideshow": [
+	 *             "photo1.jpg",
+	 *             "photo2.jpg",
+	 *             "photo3.jpg"
+	 *         ]
+	 *     };
+	 *
+	 * Usage:
+	 *
+	 *     hypester.next_photo ('slideshow');
+	 */
+	self.next_photo = function (tag) {
+		$('[data-hypester-label="' + tag + '"]').each (function () {
+			var $this = $(this),
+				num = this.getAttribute ('data-hypester-photo');
+			
+			if (! num) {
+				num = 0;
+			}
+
+			num++;
+			if (hypester_labels[tag].length <= num) {
+				num = 0;
+			}
+
+			$this.css ('background-image', 'url("' + settings.hype.resourcesFolderURL () + '/' + hypester_labels[tag][num] + '")');
+			this.setAttribute ('data-hypester-photo', num);
 		});
 	};
 	
